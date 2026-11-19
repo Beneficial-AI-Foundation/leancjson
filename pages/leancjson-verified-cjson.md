@@ -22,6 +22,16 @@
 }
 ```
 
+## What was done
+
+1. **Rewrote cJSON in Lean 4.** The parser, printer, minifier, comparison and tree API of `cJSON.c` became pure Lean functions over lists of bytes. Numbers became exact decimals instead of C doubles, so that statements about them can be proved.
+2. **Turned the unit tests into specs.** Each cJSON test file has a section in `CJson/Spec.lean`. Concrete test cases became theorems the Lean kernel evaluates; where possible a general theorem replaced the samples.
+3. **Added specs cJSON never had.** The round trip between printing and parsing, the guarantee that the parser only returns well-formed documents, and the link between the minifier and the compact printer.
+4. **Proved them.** About 1,560 lines of proof, with no `sorry`. A generated audit lists the axioms behind every spec and fails the build if one goes beyond Lean's standard three.
+5. **Verified on the VD server.** `lake build` there checks every proof and produces the C code. The C was then compiled and run against cJSON's own example files: all 11 match byte for byte.
+6. **Compared with the original.** Upstream cJSON was run on the inputs where the two disagree, to confirm each difference before writing it down.
+7. **Published.** The source is on GitHub. VeriLib cloned it, ran the Lean probe and split it into 382 atoms, the definitions and theorems you can browse in the repository card above.
+
 ## The main theorem
 
 ```latex
