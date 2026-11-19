@@ -130,7 +130,7 @@ Time to check the same file fell from 22.6 seconds to 1.0.
 
 - **The Lean kernel**, which checks the proofs.
 - **The Lean compiler, the C compiler and the runtime.** The theorems are about the Lean definitions; the C is what Lean generates from them.
-- **`Main.lean`**, the 55 lines that read a file and write the result.
+- **`Main.lean`**, the 50 or so lines that read a file and write the result.
 
 ## Not built
 

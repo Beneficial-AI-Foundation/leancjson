@@ -32,7 +32,7 @@ def usage : String :=
 def main (args : List String) : IO UInt32 := do
   match args with
   | cmd :: rest =>
-    if rest.length > 1 then
+    if rest.length > 1 || !["print", "compact", "minify", "check"].contains cmd then
       IO.eprintln usage; return 2
     let input ← readInput rest.head?
     match cmd with
