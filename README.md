@@ -34,15 +34,24 @@ vector in `Spec.lean`; the files in `tests/inputs` are theorems in `SpecExamples
 
 ## Differences from cJSON
 
-- **Numbers are exact decimals**, not `double`: `mant × 10^exp`. Nothing is rounded, big
-  numbers are kept in full, and the text printed matches C's `%g` shapes (`0.123`, `1e-09`,
-  `1.23e+129`). `-0` reads as `0`; there is no NaN/Infinity.
-- **Number syntax is RFC 8259.** cJSON accepts whatever `strtod` does (`+1`, `01`, `1.`).
-- **Bad `\u` hex digits are an error.** cJSON reads them as 0.
-- **`minify` honours every backslash escape.** cJSON only knows `\"`, so a string ending in
-  an escaped backslash (`"a\\"`) swallows the rest of the document.
+Each row was checked by running upstream cJSON (commit `6d9f244`) and this program on the same input.
+
+| Input | cJSON | leancjson |
+|---|---|---|
+| `[9007199254740993]` | `[9.00719925474099e+15]` | `[9007199254740993]` |
+| `[0.1234567890123456789]` | `[0.12345678901234568]` | `[0.1234567890123456789]` |
+| `[1e400]` | `[null]` | `[1e+400]` |
+| `[01]`, `[1.]` | accepted as `[1]` | rejected (not RFC 8259 numbers) |
+| `"a\u12G4b"` | `"a"` (bad hex reads as NUL, which cuts the string) | rejected |
+| minify `[ "a\\" , 1 ]` | `["a\\" , 1 ]` (the string never ends, so whitespace stays) | `["a\\",1]` |
+
+- **Numbers are exact decimals**, not `double`: `mant × 10^exp`. Nothing is rounded, and the
+  text printed uses C's `%g` shapes (`0.123`, `1e-09`, `1.23e+129`). `-0` reads as `0`, as
+  it prints in cJSON; there is no NaN/Infinity. Comparison is exact, not within an epsilon.
 - **Pure API.** Operations return new values (`Option` on failure) instead of mutating;
   the NULL-pointer, allocator-hook, reference and use-after-free tests have no counterpart.
+  `cJSON_Compare(a, a)` on the same pointer is always true in C; here two equal documents
+  with duplicate keys compare unequal, as two separately parsed copies do in cJSON.
 - Not ported: `cJSON_Utils` (JSON Pointer / Patch), `cJSON_Raw`, error positions
   (`cJSON_GetErrorPtr`), `cJSON_PrintPreallocated`.
 

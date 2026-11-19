@@ -158,8 +158,8 @@ theorem print_number_negative_reals :
     printNum ⟨-1, 21⟩ = b!"-1e+21" ∧ printNum ⟨-123, 127⟩ = b!"-1.23e+129" ∧
     printNum ⟨-123, -128⟩ = b!"-1.23e-126" := by decide +kernel
 
-/-- New: numbers that are not RFC 8259 numbers are not swallowed (cJSON's `strtod` accepts
-them). A leading zero ends the number; `+`, a bare `-`, a bare `.` are rejected. -/
+/-- New: only RFC 8259 numbers are numbers. cJSON hands the text to `strtod` and so accepts
+`[01]` and `[1.]`; here a leading zero ends the number and a `.` needs digits after it. -/
 theorem parse_number_strict :
     parseStrict (b!"01") = none ∧ parseStrict (b!"+1") = none ∧
     parseStrict (b!"-") = none ∧ parseStrict (b!".5") = none ∧
@@ -442,7 +442,7 @@ theorem compare_symm (a b : JSON) (cs : Bool) : compare a b cs = compare b a cs 
   unfold JSON.compare; rw [Nat.max_comm]; exact compareF_symm cs _ a b
 
 /-- New: every document without duplicate keys equals itself. (With duplicate keys it need
-not — `{"a":1,"a":2}` — which is cJSON's behaviour too.) -/
+not — `{"a":1,"a":2}` — as for two separately parsed copies in cJSON.) -/
 theorem compare_refl (v : JSON) (cs : Bool) (h : v.UniqueKeys cs) : compare v v cs = true := by
   unfold JSON.compare; rw [Nat.max_self]; exact compareF_refl cs v _ (by omega) h
 
